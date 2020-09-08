@@ -4,7 +4,7 @@ Heart Disease Dataset - Proposal
 -----------------------
 
 ### Introduction
-Heart Disease is a broad term that can be applied to many heart conditions that negatively impact heart health.  These complications can arise from a variety of factors, including genetics, environment, and unhealthy habits ^1^.  Individuals with heart disease are at a greater risk for heart attacks and heart failure ^2^.    
+Heart Disease is a broad term that can be applied to many heart conditions that negatively impact heart health.  These complications can arise from a variety of factors, including genetics, environment, and unhealthy habits [1].  Individuals with heart disease are at a greater risk for heart attacks and heart failure [2].    
 
 Finding indicators of heart disease can aid doctors in indentifying at risk individuals who need to be placed on preventative treatment. Are there certain demographic information and tests that accurately indicate the prevalence of heart disease in patients?  Which of these indicators have the most weight in determining heart disease status?  Can a model be created to accurately predict whether a patient has heart disease based on medical test records?
 
@@ -53,5 +53,5 @@ To build figures relating to the distribution of continuous heart variable distr
 
 
 ### Information About Heart Disease
-^1^ https://www.mayoclinic.org/diseases-conditions/heart-disease/symptoms-causes/syc-20353118  
-^2^ https://www.cdc.gov/heartdisease/about.htm
+[1] https://www.mayoclinic.org/diseases-conditions/heart-disease/symptoms-causes/syc-20353118  
+[2] https://www.cdc.gov/heartdisease/about.htm
