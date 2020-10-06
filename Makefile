@@ -5,7 +5,6 @@ clean:
 	rm -f figures/*.png
 	rm -f figures/*.pdf
 	rm -f derived_data/*.txt
-	rm -f bin
 
 derived_data/pure_heart.txt:\
  clean_data.R\
