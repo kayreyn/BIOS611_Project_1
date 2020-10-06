@@ -5,8 +5,11 @@
 library(tidyverse)
 library(bestglm)
 library(pROC)
-install.packages("pROC")
-
+library(pixiedust)
+library(kableExtra)
+library(gridExtra)
+library(webshot)
+library(magick)
 
 ########################################
 
@@ -46,8 +49,8 @@ for(i in 1:length(thresh)) {
 my.thresh <- thresh[which.min(misclass)]
 
 plot(thresh, misclass, pch  = ".", ylab = "Misclassification", xlab = "Threshold", main = "Threshold Calculation")
-lines(thresh, misclass)
-abline(v = my.thresh)
+  lines(thresh, misclass)
+  abline(v = my.thresh)
 
 ####################################
 
@@ -94,23 +97,45 @@ for(cv in 1:n.cv){
   npv[cv] <- conf.mat[1,1] / conf.mat[3,1]
   
   # Calculate AUC
-  auc[cv] <- auc(roc(test.set$disease.status, pred.probs))
+  auc[cv] <- auc(roc(test.set$disease.status, pred.probs, quiet = TRUE))
 } 
 
-
-mean(auc)
-mean(sens)
-mean(spec)
-mean(ppv)
-mean(npv)
+# Averages?
+mean.auc <- mean(auc)
+mean.sens <- mean(sens)
+mean.spec <- mean(spec)
+mean.ppv <- mean(ppv)
+mean.npv <- mean(npv)
 
 #####################################
 
+# Calculate Confidence Intervals
+ad <- as.data.frame(confint(heart.mod))
+rownames(ad) <- c()
+colnames(ad) <- c("lower", "upper")
 
+# Combine Confidence with Rest of Table
+whole.table <- cbind(dust(heart.mod), ad)[, c(1,2,5,6,7)]
+whole.table$estimate <- as.numeric(whole.table$estimate)
+whole.table$p.value <- as.numeric(whole.table$p.value)
 
-
-
-
-
-
+# Beautify Table and Save
+log.reg.table <- dust(whole.table) %>%
+  sprinkle(col = 2:5, round = 3) %>%
+  sprinkle_colnames(term = "Variable",
+                    estimate = "Beta",
+                    p.value = "p",
+                    lower = "Lower CI",
+                    upper = "Upper CI") %>%
+  sprinkle(cols = "term", replace = c("Intercept", "Age - Male",
+                                          "Chest Pain - Atypical Angina", "Chest Pain - Non-Anginal Pain",
+                                          "Chest Pain - Asymptomatic", "Resting Blood Pressure",
+                                          "Maximum Heart Rate", "Exercise Induced Angina - Yes",
+                                          "ST Depression", "Slope of the Peak Exercise - Flat",
+                                          "Slope of the Peak Exercise - Downsloping", "Colored Major Vessels - 1",
+                                          "Colored Major Vessels - 2", "Colored Major Vessels - 3",
+                                          "Thalium - Fixed Defect", "Thalium - Reversable Defect")) %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = F) %>%
+  save_kable("assets/log.reg.table.png", density = 1000)
 
