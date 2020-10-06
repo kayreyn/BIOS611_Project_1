@@ -28,12 +28,21 @@ heart[, cols.to.change] <- lapply(heart[, cols.to.change], factor)
 ## Variable Selection
 my.best.model <- bestglm(as.data.frame(heart), IC = "AIC", method = "exhaustive", family = binomial)
 heart.mod <- my.best.model$BestModel
-summary(heart.mod)
+#summary(my.best.model)
+#summary(heart.mod)
 
-
-##
+## Predict
 pred.probs <- predict.glm(heart.mod, type = "response") 
 
+## Rock curve
+a.roc <- roc(heart$disease.status, pred.probs)
+
+# save
+png("figures/ROC_Curve.png")
+plot(a.roc, legacy.axes = TRUE, main = "ROC Curve")
+dev.off()
+
+# Threshold Best
 thresh <- seq(0, 1, length = 100)
 misclass <- rep(NA, length = length(thresh))
 
@@ -48,9 +57,11 @@ for(i in 1:length(thresh)) {
 #Find threshold which minimizes misclassification
 my.thresh <- thresh[which.min(misclass)]
 
+png("figures/Threshold_Classification.png", width = 700)#, height = 10)
 plot(thresh, misclass, pch  = ".", ylab = "Misclassification", xlab = "Threshold", main = "Threshold Calculation")
   lines(thresh, misclass)
   abline(v = my.thresh)
+dev.off()
 
 ####################################
 
@@ -69,7 +80,6 @@ spec <- rep(NA,n.cv)
 ppv <- rep(NA,n.cv)
 npv <- rep(NA,n.cv)
 auc <- rep(NA,n.cv)
-
 
 ## Begin for loop
 for(cv in 1:n.cv){
@@ -109,14 +119,19 @@ mean.npv <- mean(npv)
 
 #####################################
 
+## ROC Curve Graph
+
+
+#####################################
+
 # Calculate Confidence Intervals
-ad <- as.data.frame(confint(heart.mod))
+ad <- exp(as.data.frame(confint(heart.mod)))
 rownames(ad) <- c()
 colnames(ad) <- c("lower", "upper")
 
 # Combine Confidence with Rest of Table
 whole.table <- cbind(dust(heart.mod), ad)[, c(1,2,5,6,7)]
-whole.table$estimate <- as.numeric(whole.table$estimate)
+whole.table$estimate <- exp(as.numeric(whole.table$estimate))
 whole.table$p.value <- as.numeric(whole.table$p.value)
 
 # Beautify Table and Save
