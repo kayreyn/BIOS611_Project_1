@@ -137,5 +137,5 @@ log.reg.table <- dust(whole.table) %>%
                                           "Thalium - Fixed Defect", "Thalium - Reversable Defect")) %>%
   kable() %>%
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = F) %>%
-  save_kable("assets/log.reg.table.png", density = 1000)
+  save_kable("figures/log.reg.table.png", density = 1000)
 
