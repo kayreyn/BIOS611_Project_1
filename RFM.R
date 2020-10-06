@@ -31,7 +31,38 @@ table(heart.train$disease.status)
 
 # Create Testing Group
 heart.test <- heart[-heart.train.nums, ]
-table(heart.test$disease.status)
+#table(heart.test$disease.status)
+
+#str(heart.train)
+
+# Tune Parameters
+k.rf <- tuneRF(x = heart.train %>% select(-disease.status),
+               y = as.factor(heart.train[['disease.status']]),
+               ntreeTry = 500, stepFactor = 3, improve = 0.01,
+               trace = TRUE, plot = TRUE)
+#k.rf
+
+# Fit Model
+heart.rf <- randomForest(as.factor(disease.status) ~ .,
+                           data = heart.train,
+                           mtry = 3,
+                           ntree = 500,
+                           importance = TRUE)
+# Test Model
+titanic.rf <- randomForest(x = heart.train %>% select(-disease.status),
+                           y = as.factor(heart.train[['disease.status']]),
+                           xtest = heart.test %>% select(-disease.status),
+                           ytest = as.factor(heart.test$disease.status),
+                           mtry = 3,
+                           ntree = 500,
+                           importance = TRUE)
+
+
+#heart.rf$err.rate
+#plot(heart.rf)                        
+#varImpPlot(heart.rf)
+#predict(heart.rf, newdata = heart)
+
 
 
 
