@@ -1,0 +1,161 @@
+---
+title: "HW4 - Weight and Height to Predict Gender"
+output: html_document
+---
+
+### Libraries
+```{r, results='hide', message=FALSE}
+## Load Libraries
+library(tidyverse)
+library(gbm)
+library(MLmetrics)
+library(stats)
+library(pROC)
+```
+
+### Data
+```{r, results='hide', message=FALSE}
+
+# Filepath
+gen.file <- "./source_data/gen_height_weight.txt"
+
+# Load
+gen <- read_delim(gen.file, col_names = TRUE, delim = "\t")
+
+# Examine
+str(gen)
+
+# Set Seed
+set.seed(101120202)
+
+# Initial Graph
+ggplot(gen, aes(Height, Weight, color = Gender)) +
+	geom_point() +
+	labs(color = "Gender") +
+	scale_color_manual(labels = c("Male", "Female"), values = c("blue", "red")) +
+	ggtitle("Gender from Height and Weight")
+```
+
+
+### 1 - Build a GLM.
+```{r}
+# Assign Group
+gen <- gen %>% mutate(Set = sample(c("Train", "Validate", "Test"), size = nrow(gen), prob = c(.7, .15,.15), replace= TRUE))
+
+# Gender Column becomes 0 or 1
+gen <- gen %>% mutate(Gender = c(Gender == "Male"))
+
+# Split up by Group
+train <- gen %>% filter(Set == "Train")
+validate <- gen %>% filter(Set == "Validate")
+test <- gen %>% filter(Set == "Test")
+
+# Build Model
+model <- glm(Gender ~ Height + Weight, family = binomial(link = 'logit'), data = train)
+
+# Predict Genders
+pred <- predict(model, newdata = validate, type = "response")
+
+# Accuracy
+glm.accuracy <- sum((pred > 0.5) == validate$Gender) / nrow(validate)
+#F1_Score(validate$Gender, pred > 0.5)
+```
+The accuracy of the GLM model is `r glm.accuracy`.
+
+
+
+### 2 - Build a GBM
+
+```{r, results='hide', message=FALSE}
+# Build Model
+gbm.model <- gbm(Gender ~ Height + Weight, distribution = "bernoulli",
+			 data = train,
+       n.trees = 100,
+       interaction.depth = 2,
+       shrinkage = 0.1)
+
+# Predict Genders
+gbm.pred <- predict(gbm.model, newdata = validate, type = "response")
+
+# Accuracy
+gbm.accuracy <- sum((gbm.pred > 0.5) == validate$Gender) / nrow(validate)
+#F1_Score(validate$Gender, gbm.pred > 0.5)
+```
+The accuracy of the GBM model is `r gbm.accuracy`.
+
+
+### 3 - Only 50 Males
+
+```{r, results='hide', message=FALSE}
+# All F, 50 M
+gen.male <- gen %>% filter(Gender == TRUE) %>% sample_n(size = 50, replace = FALSE)
+gen.female <- gen %>% filter(Gender == FALSE)
+
+# Combine
+few.m <- full_join(gen.male, gen.female)
+
+# New Set Assignments
+few.m <- few.m %>% mutate(Set = sample(c("Train", "Validate", "Test"), size = nrow(few.m), prob = c(.7, .15,.15), replace= TRUE))
+
+# Split Anew
+train.m <- few.m %>% filter(Set == "Train")
+validate.m <- few.m %>% filter(Set == "Validate")
+test.m <- few.m %>% filter(Set == "Test")
+
+# GBM Model, fewer Men
+# Build Model
+gbm.model.m <- gbm(Gender ~ Height + Weight, distribution = "bernoulli",
+			 data = train.m)
+
+# Predict Genders
+gbm.pred.m <- predict(gbm.model.m, newdata = validate.m, type = "response")
+
+# Accuracy
+fifty.accuracy <- sum((gbm.pred.m > 0.5) == validate.m$Gender) / nrow(validate)
+
+# F1
+# F1_Score(y_true = validate.m$Gender, y_pred = gbm.pred.m > 0.5)
+fifty.f1 <- 0
+```
+The F1 Score of the GBM model with only 50 males is `r fifty.f1`.
+
+
+## 4 - ROC Curve
+
+```{r}
+## Rock curve
+little.roc <- validate.m %>% pull(Gender)
+roc.create <- roc(little.roc, gbm.pred.m)
+
+## Area Under the Curve
+roc.area <- auc(roc.create)
+```
+The following plot is the ROC Curve for the GBM with 50 Males:
+```{r, echo = FALSE, message = FALSE}
+plot(roc.create, legacy.axes = TRUE, main = "ROC Curve")
+```
+
+
+
+
+The AUC for this ROC Curve is `r roc.area`.  This means SOMETHING.
+
+### 5 - K-Means
+```{r}
+# Prepare Table
+kmean.df <- gen %>% select(c(Height, Weight))
+
+# KMeans
+cluster.det <- kmeans(kmean.df, 2)
+
+# Assign Cluster nums
+kmean.df$cluster.num <- as.character(cluster.det$cluster)
+
+# Graph
+ggplot(kmean.df, aes(Height, Weight, color = cluster.num)) +
+	geom_point() +
+	labs(color = "Gender") +
+	scale_color_manual(labels = c("Male", "Female"), values = c("blue", "red")) +
+	ggtitle("Predicted Gender from Height and Weight")
+```
+
