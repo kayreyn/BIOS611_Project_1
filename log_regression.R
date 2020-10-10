@@ -135,7 +135,8 @@ whole.table$estimate <- exp(as.numeric(whole.table$estimate))
 whole.table$p.value <- as.numeric(whole.table$p.value)
 
 # Beautify Table and Save
-log.reg.table <- dust(whole.table) %>%
+png(filename="figures/log_reg_table.png")
+dust(whole.table) %>%
   sprinkle(col = 2:5, round = 3) %>%
   sprinkle_colnames(term = "Variable",
                     estimate = "Beta",
@@ -150,7 +151,5 @@ log.reg.table <- dust(whole.table) %>%
                                           "Slope of the Peak Exercise - Downsloping", "Colored Major Vessels - 1",
                                           "Colored Major Vessels - 2", "Colored Major Vessels - 3",
                                           "Thalium - Fixed Defect", "Thalium - Reversable Defect")) %>%
-  kable() %>%
-  kable_styling(bootstrap_options = c("striped","condensed"), full_width = F) %>%
-  save_kable("figures/log.reg.table.png", density = 1000)
-
+  as.data.frame() %>%
+  write.table("derived_data/regression_output.txt", quote = FALSE, sep = "\t", row.names =  FALSE)
