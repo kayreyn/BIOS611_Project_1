@@ -10,6 +10,11 @@ Final_Report.pdf:\
  figures/Threshold_Classification.png
 	Rscript -e "rmarkdown::render('Final_Report.Rmd', output_format = 'pdf_document')"
 
+HW_4.pdf:\
+	HW4.Rmd\
+	source_data/gen_height_weight.txt
+		Rscript -e "rmarkdown::render('HW4.Rmd', output_format = 'pdf_document')"
+
 clean:
 	rm -f assets/*.png
 	rm -f figures/*.png
