@@ -1,11 +1,11 @@
 ---
 title: "HW4 - Weight and Height to Predict Gender"
-output: html_document
+output: pdf_document
 ---
 
+
+```{r, results='hide', message=FALSE, echo = FALSE}
 ### Libraries
-```{r, results='hide', message=FALSE}
-## Load Libraries
 library(tidyverse)
 library(gbm)
 library(MLmetrics)
@@ -14,7 +14,7 @@ library(pROC)
 ```
 
 ### Data
-```{r, results='hide', message=FALSE}
+```{r, results='hide', message=FALSE, echo = FALSE}
 
 # Filepath
 gen.file <- "./source_data/gen_height_weight.txt"
@@ -27,7 +27,11 @@ str(gen)
 
 # Set Seed
 set.seed(101120202)
+```
 
+The graph below illustrates the relationship and distribution of height and weight by gender.  There appears to be no clear difference between the two groups by gender, since this data was randomly generated and does not represent actual distributions. 
+
+```{r, echo = FALSE, message = FALSE}
 # Initial Graph
 ggplot(gen, aes(Height, Weight, color = Gender)) +
 	geom_point() +
@@ -57,10 +61,9 @@ model <- glm(Gender ~ Height + Weight, family = binomial(link = 'logit'), data =
 pred <- predict(model, newdata = validate, type = "response")
 
 # Accuracy
-glm.accuracy <- sum((pred > 0.5) == validate$Gender) / nrow(validate)
-#F1_Score(validate$Gender, pred > 0.5)
+glm.accuracy <- round(sum((pred > 0.5) == validate$Gender) / nrow(validate), 3)
 ```
-The accuracy of the GLM model is `r glm.accuracy`.
+The accuracy of the GLM model is `r glm.accuracy`.  This is a very poor accuracy, but since there is no difference in gender height and weight distributions in this data the result is understandable. 
 
 
 
@@ -78,10 +81,9 @@ gbm.model <- gbm(Gender ~ Height + Weight, distribution = "bernoulli",
 gbm.pred <- predict(gbm.model, newdata = validate, type = "response")
 
 # Accuracy
-gbm.accuracy <- sum((gbm.pred > 0.5) == validate$Gender) / nrow(validate)
-#F1_Score(validate$Gender, gbm.pred > 0.5)
+gbm.accuracy <- round(sum((gbm.pred > 0.5) == validate$Gender) / nrow(validate), 3)
 ```
-The accuracy of the GBM model is `r gbm.accuracy`.
+The accuracy of the GBM model is `r gbm.accuracy`.  This accuracy is still not very good and is not significantly better than the GLM model.
 
 
 ### 3 - Only 50 Males
@@ -111,26 +113,30 @@ gbm.model.m <- gbm(Gender ~ Height + Weight, distribution = "bernoulli",
 gbm.pred.m <- predict(gbm.model.m, newdata = validate.m, type = "response")
 
 # Accuracy
-fifty.accuracy <- sum((gbm.pred.m > 0.5) == validate.m$Gender) / nrow(validate)
+fifty.accuracy <- round(sum((gbm.pred.m > 0.5) == validate.m$Gender) / nrow(validate), 3)
 
 # F1
 # F1_Score(y_true = validate.m$Gender, y_pred = gbm.pred.m > 0.5)
-fifty.f1 <- 0
 ```
-The F1 Score of the GBM model with only 50 males is `r fifty.f1`.
+Because the model never predicted any individual was male, the F1 Score of the GBM model cannot be defined. There is not a significant difference in heights and weights between males and females in this data set, so the GBM model attains the best results if it always predicts that every individual is female.  Since the majority of individuals in the training set were females, this actually is a good decision.  The accuracy of this model was not worse than the balanced models (`r fifty.accuracy`).
 
 
 ## 4 - ROC Curve
 
-```{r}
+```{r, message = FALSE}
 ## Rock curve
 little.roc <- validate.m %>% pull(Gender)
 roc.create <- roc(little.roc, gbm.pred.m)
 
 ## Area Under the Curve
-roc.area <- auc(roc.create)
+roc.area <- round(auc(roc.create), 3)
 ```
+
+
 The following plot is the ROC Curve for the GBM with 50 Males:
+
+
+
 ```{r, echo = FALSE, message = FALSE}
 plot(roc.create, legacy.axes = TRUE, main = "ROC Curve")
 ```
@@ -138,7 +144,7 @@ plot(roc.create, legacy.axes = TRUE, main = "ROC Curve")
 
 
 
-The AUC for this ROC Curve is `r roc.area`.  This means SOMETHING.
+The AUC for this ROC Curve is `r roc.area`.  This means that the GBM model for the 50 males model only does a slightly better job at predicting gender based on height and weight than a model that randomly guessed (AUC = 0.50).  Seeing as there is no difference in height and weight distributions between males and females in this randomly generated data, the AUC value makes sense.
 
 ### 5 - K-Means
 ```{r}
@@ -150,12 +156,17 @@ cluster.det <- kmeans(kmean.df, 2)
 
 # Assign Cluster nums
 kmean.df$cluster.num <- as.character(cluster.det$cluster)
+```
 
+The graph below illustrates the two clustering groups created by the K-Means model.
+
+```{r echo = FALSE}
 # Graph
 ggplot(kmean.df, aes(Height, Weight, color = cluster.num)) +
 	geom_point() +
-	labs(color = "Gender") +
-	scale_color_manual(labels = c("Male", "Female"), values = c("blue", "red")) +
+	labs(color = "Cluster") +
+	scale_color_manual(labels = c("Group 1", "Group 2"), values = c("blue", "red")) +
 	ggtitle("Predicted Gender from Height and Weight")
 ```
 
+It is not possible to determine which group is male or female since the distributions of height and weight were extremely similar between the two groups.  It appears that the K-Means model split the individuals up into the groups based on whether individuals weighed more or less than 105 lbs.  There is an equal chance of either cluster representing the predicted male or female group. 
