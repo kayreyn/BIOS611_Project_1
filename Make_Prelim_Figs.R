@@ -32,7 +32,9 @@ age.bx <- ggplot(heart, aes(x = disease.status, y = age)) +
 	xlab("") +
 	coord_flip() +
 	ylab("Age (years)") +
-	scale_x_discrete(labels = c("Heart Disease", "Control"))
+	scale_x_discrete(labels = c("Heart Disease", "Control")) +
+  theme(axis.text = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 18,face = "bold"))
 
 # Resting Blood Pressure
 restingbp.bx <- ggplot(heart, aes(x = disease.status, y = restingbp)) + 
@@ -40,7 +42,10 @@ restingbp.bx <- ggplot(heart, aes(x = disease.status, y = restingbp)) +
 	xlab("") +
 	coord_flip() +
 	ylab("Resting Blood Pressure (mmHg)") +
-	scale_x_discrete(labels = c("Heart Disease", "Control"))
+	scale_x_discrete(labels = c("Heart Disease", "Control")) +
+  theme(axis.text = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 18,face = "bold"))
+
 
 # Cholesterol Count
 cholest.bx <- ggplot(heart, aes(x = disease.status, y = cholest)) + 
@@ -48,7 +53,9 @@ cholest.bx <- ggplot(heart, aes(x = disease.status, y = cholest)) +
 	xlab("") +
 	coord_flip() +
 	ylab("Cholesterol Level (mmol/L)") +
-	scale_x_discrete(labels = c("Heart Disease", "Control"))
+	scale_x_discrete(labels = c("Heart Disease", "Control")) +
+  theme(axis.text = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 18,face = "bold"))
 
 # Maximum Heart Rate
 maxheartrate.bx <- ggplot(heart, aes(x = disease.status, y = maxheartrate)) + 
@@ -56,27 +63,25 @@ maxheartrate.bx <- ggplot(heart, aes(x = disease.status, y = maxheartrate)) +
 	xlab("") +
 	coord_flip() +
 	ylab("Maximum Heart Rate (bpm)") +
-	scale_x_discrete(labels = c("Heart Disease", "Control"))
+	scale_x_discrete(labels = c("Heart Disease", "Control")) +
+  theme(axis.text = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 18,face = "bold"))
 
-# SOMETHING
+# St. Depress
 st.depress.bx <- ggplot(heart, aes(x = disease.status, y = st.depress)) + 
 	geom_boxplot(fill = "lightblue") +
   xlab("") +
 	coord_flip() +
 	ylab("ST Depression Induced by Exercise Relative to Rest (mm)") +
-	scale_x_discrete(labels = c("Heart Disease", "Control"))
+	scale_x_discrete(labels = c("Heart Disease", "Control")) +
+  theme(axis.text = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 18,face = "bold"))
 
 lay <- rbind(c(1,1,1,1,10),
              c(2,2,2,2,10),
              c(3,3,3,3,10),
              c(4,4,4,4,10),
              c(5,5,5,5,10))
-
-# All Continuous Vars
-#grid.arrange(age.bx, restingbp.bx, cholest.bx, maxheartrate.bx, st.depress.bx, 
-#            left = "Disease Status",
-#            top = textGrob("Continuous Variable Distributions", gp = gpar(fontsize = 15)),
-#            layout_matrix = lay)
 
 cont.vars <- arrangeGrob(age.bx, restingbp.bx, cholest.bx, maxheartrate.bx, st.depress.bx,
                          left = textGrob("Disease Status", gp = gpar(fontsize = 15), rot = 90),
@@ -85,6 +90,17 @@ cont.vars <- arrangeGrob(age.bx, restingbp.bx, cholest.bx, maxheartrate.bx, st.d
 
 ggsave("figures/cont_var_distributions.png", cont.vars, width = 5, height = 6)
 
+final.cont.var <- arrangeGrob(age.bx, restingbp.bx, cholest.bx, maxheartrate.bx, st.depress.bx,
+                         left = textGrob("Disease Status", gp = gpar(fontsize = 25), rot = 90),
+                         top = textGrob("Continuous Variable Distributions", gp = gpar(fontsize = 33)),
+                         layout_matrix = lay <- rbind(c(1, 1, 6, 6),
+                                                      c(1, 1, 4, 4),
+                                                      c(2, 2, 4, 4),
+                                                      c(2, 2, 5, 5),
+                                                      c(3, 3, 5, 5),
+                                                      c(3, 3, 6, 6)))
+                         
+ggsave("figures/final_cont_var.png", final.cont.var, width = 18, height = 9)
 
 #############################################################
 
@@ -103,7 +119,9 @@ sex.cnt <- ggplot(heart, aes(sex)) +
 				labels = c("Control", "Heart Disease")) +
   theme(legend.position="right") +
   scale_x_discrete(breaks=c("0","1"),
-                   labels=c("Female", "Male"))
+                   labels=c("Female", "Male")) +
+  theme(legend.text=element_text(size=15),
+        legend.title=element_text(size=17))
 
 # Chest Pain Counts
 chest.cnt <- ggplot(heart, aes(chest.pain)) + 
@@ -220,4 +238,13 @@ discrete.vars <- arrangeGrob(arrangeGrob(sex.cnt + theme(legend.position="none")
                              left = textGrob("Count", gp = gpar(fontsize = 15), rot = 90))
 
 ggsave("figures/disc_var_distributions.png", discrete.vars, height = 9, width = 9.5)
+
+
+final.discrete.vars <- arrangeGrob(arrangeGrob(sex.cnt + theme(legend.position="none"),
+                                         mag.vessels.cnt, exercise.cnt, oldpeak.cnt, mylegend,
+                                         restingec.cnt, fasting.cnt, chest.cnt, thal.cnt, nrow = 3),
+                             top = textGrob("Discrete Variable Distributions", gp = gpar(fontsize = 18)),
+                             left = textGrob("Count", gp = gpar(fontsize = 15), rot = 90))
+
+ggsave("figures/final_disc_var.png", final.discrete.vars, height = 9, width = 9.5)
 
