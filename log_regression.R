@@ -6,7 +6,6 @@ library(tidyverse)
 library(bestglm)
 library(pROC)
 library(pixiedust)
-library(kableExtra)
 library(gridExtra)
 library(webshot)
 library(magick)
@@ -14,14 +13,13 @@ library(magick)
 ########################################
 
 ## Load Data
-heart <- read_csv("derived_data/pure_heart.txt",
-                  col_names = TRUE)
+heart <- suppressMessages(read_csv("derived_data/pure_heart.txt",
+                  col_names = TRUE))
 
 ## Cleaning
 # Factors
 cols.to.change <- c(2, 3, 6, 7, 9, 11, 12, 13, 14)
 heart[, cols.to.change] <- lapply(heart[, cols.to.change], factor)
-# str(heart)
 
 ########################################
 
@@ -35,12 +33,18 @@ heart.mod <- my.best.model$BestModel
 pred.probs <- predict.glm(heart.mod, type = "response") 
 
 ## Rock curve
-a.roc <- roc(heart$disease.status, pred.probs)
+a.roc <- suppressMessages(roc(heart$disease.status, pred.probs))
 
 # save
-png("figures/ROC_Curve.png")
-plot(a.roc, legacy.axes = TRUE, main = "ROC Curve")
-dev.off()
+roc.df <- data.frame("sens" = a.roc$sensitivities, "spec1" = 1 -a.roc$specificities)
+ggsave("figures/ROC_Curve.png", 
+       ggplot(roc.df, aes(x = spec1, y = sens)) +
+        geom_line(size = 1.001) +
+        geom_abline(intercept = 0, slope = 1) +
+        ylab("Sensitivity") +
+        xlab("1 - Specificity")+
+        ggtitle("Regression ROC Curve"), 
+       device = png(), width = 3, height = 3)
 
 # Threshold Best
 thresh <- seq(0, 1, length = 100)
@@ -48,8 +52,10 @@ misclass <- rep(NA, length = length(thresh))
 
 ##Find the threshold
 for(i in 1:length(thresh)) {
+  
   #If probability greater than threshold then 1 else 0
   my.classification <- ifelse(pred.probs > thresh[i], 1, 0)  # must match what data says :)
+  
   # calculate the pct where my classification not eq truth
   misclass[i] <- mean(my.classification != heart$disease.status)
 }
@@ -57,11 +63,16 @@ for(i in 1:length(thresh)) {
 #Find threshold which minimizes misclassification
 my.thresh <- thresh[which.min(misclass)]
 
-png("figures/Threshold_Classification.png", width = 700)#, height = 10)
-plot(thresh, misclass, pch  = ".", ylab = "Misclassification", xlab = "Threshold", main = "Threshold Calculation")
-  lines(thresh, misclass)
-  abline(v = my.thresh)
-dev.off()
+# Save Plot
+thrsh.df <- data.frame("thr" = thresh, "misclass" = misclass)
+ggsave("figures/Threshold_Classification.png", 
+       ggplot(thrsh.df, aes(x = thr, y = misclass)) +
+         geom_line() +
+         geom_vline(xintercept = my.thresh, col = "darkgreen", size = 1.2) +
+         ylab("Misclassification Rate") +
+         xlab("Threshold Value")+
+         ggtitle("Best Threshold"), 
+       device = png(), width = 4, height = 3)
 
 ####################################
 
