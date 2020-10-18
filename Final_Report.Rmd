@@ -1,11 +1,13 @@
 ---
-title: "Heart Disease - Final Report"
 output: pdf_document
 ---
 
+# Heart Disease - Final Report
+
+
 ### Introduction
 
-Heart Disease is a broad term that can be applied to many heart conditions that negatively impact heart health.  These complications can arise from a variety of factors, including genetics, environment, and unhealthy habits [1].  Individuals with heart disease are at a greater risk for heart attacks and heart failure [2].    
+Heart Disease is a broad term that can be applied to many heart conditions that negatively impact heart health, including coronary artery disease, arrhythmia, and aortic stenosis [1].  These complications can arise from a variety of factors, including genetics, environment, and unhealthy habits [2].  Because heart disease is the number cause of death in the United States [3], understanding risk factors is an important step in developing effective prevention strategies.  
 
 Finding indicators of heart disease can aid doctors in identifying at risk individuals who need to be placed on preventative treatment. Are there certain demographic information and tests that accurately indicate the prevalence of heart disease in patients?  Which of these indicators have the most weight in determining heart disease status?  Can a model be created to accurately predict whether a patient has heart disease based on medical test records?
 
@@ -18,17 +20,17 @@ https://archive.ics.uci.edu/ml/datasets/heart+Disease. It is a collection of dat
 
 Before beginning analysis, some preliminary graphs were created to examine the distributions of the variables. These graphs aid in checking for potential issues with lack of categorical data representation and logistic regression assumption violations.
 
-Below are boxplots illustrate the distributions of the continuous variables in the dataset. These variables are age of the participant, resting blood pressure, cholesterol level, maximum heart rate, and ST depression induced by excercise relative to rest.
+Below are box plots illustrating the distributions of the continuous variables in the data set. These variables are age of the participant, resting blood pressure, cholesterol level, maximum heart rate, and ST depression induced by exercise relative to rest.
 
-![](figures/cont_var_distributions.png)
+![]("figures/final_cont_var.png")
 
-With the exception of ST depression induced by excercise relative to rest for the heart disease group, the distributions appear to be symmetrical without too many eggregious outliers. This will ensure that the estimated beta coefficients in the logistic regression model are accurate. Many of the distributions overlap signifcantly, which will reduce odds ratio sizes and make it more difficult to identify significant relationships. 
+With the exception of ST depression induced by exercise relative to rest for the heart disease group, the distributions appear to be symmetrical without too many egregious outliers. This will ensure that the estimated beta coefficients in the logistic regression model are accurate. Many of the distributions overlap significantly, which will reduce odds ratio sizes and make it more difficult to identify significant relationships. 
 
 The bar graphs displayed below make it easy to visualize the frequency of the levels of discrete variables in the data.  Several of these variables clarification on their meaning to understand why they were included in the data set. 
 
-![](figures/disc_var_distributions.png)
+![]("figures/final_disc_var.png")
 
-The variables resting electrocardiographic results, thalium, and peak exercise ST segment slope all have one category that has very small counts. This could result in overfitted models because these categories will be underrespresented.  Thalium and chest pain type seem to have the most dramatic differences in counts, potentially indicating their future significance in predicitive models. 
+The variables resting electrocardiographic results, thalium, and peak exercise ST segment slope all have one category that has very small counts. This could result in overfitted models because these categories will be underrepresented.  Thalium and chest pain type seem to have the most dramatic differences in counts, potentially indicating their future significance in predictive models. 
 
 ### Methods
 
@@ -40,11 +42,10 @@ Before creating a finalized regression model, variable selection was implemented
 
 The beta coefficients and 95% confidence intervals were then calculated and back-transformed onto the original scale.  P values less than 0.05 signify a significant beta coefficient. 
 
-#### Regression Output Table
+#### Regression Output Table 
+\  
 
-As an example of interpretation, we are 95% confident that an individual who is male is between 1.758 to 13.8 times as likely to be diagnosed with heart disease as a female, holding all other variables constant.  Additionally, as the maximum heart rate of a patient increases by 1 beats per minute, we are 95% confident that he or she will be 0.964 to 1.006 times as likely to be diagnosed with heart disease.  
-
-Modifying the threshold at which an individual is labeled as having heart disease can increase prediction success. Various thresholds between 0 and 1 were checked with the model to identify the threshold which minimized misclassifications.  A graph of these misclassification rates can be seen below. The threshold that will be used for future predictions is 0.43.
+The table below displays the output from the linear regression model.
 
 ```{r results = 'asis', message=FALSE, echo=FALSE}
 library(kableExtra)
@@ -56,13 +57,24 @@ reg.tab %>%
   kable_styling(bootstrap_options = c("striped","condensed"))
 ```
 
+As an example of interpretation, we are 95% confident that an individual who is male is between 1.758 to 13.8 times as likely to be diagnosed with heart disease as a female, holding all other variables constant.  Additionally, as the maximum heart rate of a patient increases by 1 beats per minute, we are 95% confident that he or she will be 0.964 to 1.006 times as likely to be diagnosed with heart disease.  
+
 
 #### Threshold Misclassification Rates
-![](figures/Threshold_Classification.png)
+\  
 
-One way to measure whether a logistic regression model is good is by examining a ROC curve.  A ROC curve plots the model's sensitivity values against its specificity values. The better a model does at classification, the larger the area under this curve will be.  A ROC curve for this regression model is placed below.  The area under the curve is 0.93, which indicates this regression model is very good at prediciting disease status. 
+Modifying the threshold at which an individual is labeled as having heart disease can increase prediction success. Various thresholds between 0 and 1 were checked with the model to identify the threshold which minimized misclassifications.  A graph of these misclassification rates can be seen below. The threshold that will be used for future predictions is 0.43.  
 
-![](figures/ROC_Curve.png)
+```{r, echo=FALSE, fig.align='center'}
+library(knitr)
+include_graphics("figures/Threshold_Classification.png")
+```
+
+One way to measure whether a logistic regression model is good is by examining a ROC curve.  A ROC curve plots the model's sensitivity values against its specificity values. The better a model does at classification, the larger the area under this curve will be.  A ROC curve for this regression model is placed below.  The area under the curve is 0.93, which indicates this regression model is very good at predicting disease status. 
+
+```{r, echo=FALSE, fig.align='center'}
+include_graphics("figures/ROC_Curve.png")
+```
 
 To evaluate the predictive strength of the model, a k-fold cross validation simulation was conducted. With each simulation, 90% of the heart disease data was allocated to a training set, and the remaining 10% set aside as a testing set.  The training set is used to create a logistic regression model using the same variables identified in variable selection above.  This training can then be used to test its ability in accurately predicting the disease status of patients in the testing set.  From these predictions, measures of sensitivity, specificity, and ROC curves can be generated. This model had an average area under the curve of 0.937, average sensitivity of 0.87, and average specificity of 0.88.  All of these indicate that the model's predictive accuracy is very strong.
 
@@ -70,8 +82,13 @@ To evaluate the predictive strength of the model, a k-fold cross validation simu
 
 The logistic regression model identified several variables that have a significant effect on heart disease status, including being male, having asymptomatic chest pain, increasing resting blood pressure, and having colored major blood vessels. Identifying these significant variables could help doctors monitor characteristics that could lead to heart disease.
 
-This model also does a very good job with prediciting the disease status of patients. Therfore, it could be used to identify individuals who are at risk of developing heart disease so they can be treated preventively.
+This model also does a very good job with predicting the disease status of patients. Therefore, it could be used to identify individuals who are at risk of developing heart disease so they can be treated preventitively.
 
-#### Citations 
-[1] https://www.mayoclinic.org/diseases-conditions/heart-disease/symptoms-causes/syc-20353118
-[2] https://www.cdc.gov/heartdisease/about.htm
+#### Citations  
+\  
+
+[1] https://www.medicalnewstoday.com/articles/237191#symptoms
+
+[2] https://www.mayoclinic.org/diseases-conditions/heart-disease/symptoms-causes/syc-20353118
+
+[3] https://www.cdc.gov/nchs/fastats/leading-causes-of-death.htm
