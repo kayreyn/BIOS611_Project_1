@@ -133,7 +133,7 @@ chest.cnt <- ggplot(heart, aes(chest.pain)) +
 				labels = c("Control", "Heart Disease")) +
   theme(legend.position="none") +
   scale_x_discrete(breaks=c("1","2", "3", "4"),
-                   labels=c("Typical\nAngina", "Atypical\nAngina", "Non-Anginal\nPain", "Asymptomatic"))
+                   labels=c("Typical\nAngina", "Atypical\nAngina", "Non-Anginal\nPain", "No\nSymptoms"))
 
 # Fasting Counts
 fasting.cnt <- ggplot(heart, aes(fastingbs)) + 
