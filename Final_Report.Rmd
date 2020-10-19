@@ -20,13 +20,13 @@ https://archive.ics.uci.edu/ml/datasets/heart+Disease. It is a collection of dat
 
 Before creating the logistic regression model, some preliminary graphs of the included variables were created. These graphs aid in checking for potential issues with low categorical data frequency and logistic regression assumption violations.
 
-Below are box plots illustrating the distribution of the continuous variables in the data set, separated by disease status. For clarification, the variable ST depression induced by exercise relative to rest means SOMETHING.
+Below are box plots illustrating the distribution of the continuous variables in the data set, separated by disease status. For clarification, the variable ST depression measures blood flow to the heart.
 
 ![]("figures/final_cont_var.png")
 
 With the exception of ST depression induced by exercise relative to rest in the heart disease group, the distributions appear to be symmetrical without too many egregious outliers. This adds confidence that the estimated beta coefficients in the logistic regression model are accurate. Many of the distributions overlap significantly, which will reduce odds ratio estimates and make it more difficult to distinguish true differences between individuals with heart disease and healthy patients. 
 
-The bar graphs displayed below make it easy to visualize the frequency of the levels of discrete variables in the data.  The number of major vessels colored by flourosopy MEANS.
+The bar graphs displayed below make it easy to visualize the frequency of the levels of discrete variables in the data.  Fluoroscopy and thallium tests measure blood flow to the heart.  An electrocardiogram measures heart functionality to detect previous heart conditions and irregular heart beat [4]. Exercise induced angina simply refers to whether a patient experienced chest pain during exercise. 
 
 ![]("figures/final_disc_var.png")
 
@@ -96,3 +96,5 @@ To validate the findings of this report, this process should be repeated using d
 [2] https://www.mayoclinic.org/diseases-conditions/heart-disease/symptoms-causes/syc-20353118
 
 [3] https://www.cdc.gov/nchs/fastats/leading-causes-of-death.htm
+
+[4] https://www.mayoclinic.org/tests-procedures/ekg/about/pac-20384983
