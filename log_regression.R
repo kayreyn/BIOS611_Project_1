@@ -159,6 +159,6 @@ dust(whole.table) %>%
                                           "ST Depression", "Slope of the Peak Exercise - Flat",
                                           "Slope of the Peak Exercise - Downsloping", "Colored Major Vessels - 1",
                                           "Colored Major Vessels - 2", "Colored Major Vessels - 3",
-                                          "Thalium - Fixed Defect", "Thalium - Reversable Defect")) %>%
+                                          "Thallium - Fixed Defect", "Thallium - Reversable Defect")) %>%
   as.data.frame() %>%
   write.table("derived_data/regression_output.txt", quote = FALSE, sep = "\t", row.names =  FALSE)

@@ -196,7 +196,7 @@ mag.vessels.cnt <- ggplot(heart, aes(mag.vessels)) +
 # Thal Counts
 thal.cnt <- ggplot(heart, aes(thal)) + 
 	geom_bar(aes(fill = disease.status), position = "dodge") + 
-	xlab("Thalium") + 
+	xlab("Thallium") + 
 	ylab("") +
 	scale_fill_manual(values = bar.cols,
 				name = "Disease Status", 

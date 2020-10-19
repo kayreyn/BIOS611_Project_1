@@ -30,7 +30,7 @@ The bar graphs displayed below make it easy to visualize the frequency of the le
 
 ![]("figures/final_disc_var.png")
 
-The variables resting electrocardiographic results, thalium, and peak exercise ST segment slope all have one category that has very small counts. This could result in an overfitted model because these categories will be underrepresented.  Thalium and chest pain type seem to have the most dramatic differences in counts, potentially indicating their future weight in predictive models. 
+The variables resting electrocardiographic results, thallium, and peak exercise ST segment slope all have one category that has very small counts. This could result in an overfitted model because these categories will be underrepresented.  Thallium and chest pain type seem to have the most dramatic differences in counts, potentially indicating their future weight in predictive models. 
 
 ### Methods
 
@@ -58,7 +58,7 @@ reg.tab %>%
   kable_styling(bootstrap_options = c("striped","condensed"))
 ```
 
-As an example of interpretation, we are 95% confident that an individual who is male is between 1.758 to 13.8 times as likely to be diagnosed with heart disease as a female, holding all other variables constant.  Additionally, as the maximum heart rate of a patient increases by 1 beats per minute, we are 95% confident that he or she will be 0.964 to 1.006 times as likely to be diagnosed with heart disease.  
+As an example of interpretation, we are 95% confident that an individual who is male is between 1.758 to 13.8 times as likely to be diagnosed with heart disease as a female, holding all other variables constant.  Additionally, as the maximum heart rate of a patient increases by 1 beat per minute, we are 95% confident that he or she will be 0.964 to 1.006 times as likely to be diagnosed with heart disease.  
 
 
 #### Threshold Misclassification Rates
@@ -85,7 +85,7 @@ The logistic regression model identified several variables that have a significa
 
 The k fold cross validation indicates this regression model does an adequate job of predicting whether an individual has heart disease. With an AUC of 0.889, the model increases predictive success from random guessing (AUC =0.5). A sensitivity of 0.799 means that 79.9% of the individuals the model classified as having heart disease actually had heart disease.  The specificity of 0.849 means that 84.8% of individuals that the model identified as being healthy were actually healthy. While a higher sensitivity would indicate a stronger model, it is a better MISTAKE to classify individuals as DISEASED than miss important indication of heart problems.  Therefore, future models should focus on increasing the specificity rate, signifying that the model can always find the individuals who are at risk of heart disease issues.
 
-To validate the findings of this report, this process should be repeated using data collected from other cites. If the variables that were significant in this model continue to be significant with new data, then there is an even stronger indication that these characteristics contribute to heart disease. Additionally, other machine learning models could be trained using this data to see if higher predictive accuracy can be achieved. 
+To validate the findings of this report, this process should be repeated using data collected from other sites. If the variables that were significant in this model continue to be significant with new data, then there is an even stronger indication that these characteristics contribute to heart disease. Additionally, other machine learning models could be trained using this data to see if higher predictive accuracy can be achieved. 
 
 
 #### Citations  
