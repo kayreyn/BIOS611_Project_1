@@ -20,7 +20,7 @@ clean:
 	rm -f figures/*.pdf
 	rm -f derived_data/*.txt
 	rm -f *.pdf
-
+	
 derived_data/pure_heart.txt:\
  clean_data.R\
  source_data/cleveland.txt
