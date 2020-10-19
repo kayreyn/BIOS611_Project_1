@@ -7,9 +7,9 @@ output: pdf_document
 
 ### Introduction
 
-Heart Disease is a broad term that can be applied to many heart conditions that negatively impact heart health, including coronary artery disease, arrhythmia, and aortic stenosis [1].  These conditions are often the result of an individual's genetics, environment, or unhealthy habits [2].  Because heart disease is the number cause of death in the United States [3], understanding risk factors is an important step in developing effective prevention strategies.  
+Heart disease is the number one cause of death in the United States [1].  This medical category includes many heart conditions that negatively impact heart health, including coronary artery disease, arrhythmia, and aortic stenosis [2].  These conditions are often the result of an individual's genetics, environment, or unhealthy habits [3]. Understanding risk factors is an important step in developing effective prevention strategies to decrease heart disease death rates. 
 
-This report describes the creation of a logistic regression model that has the potential to be useful both in identifying factors associated with an increased likelihood of having heart disease, and in predicting whether future patients are at risk of developing heart disease based on the characteristics examined in this data set.
+This report describes the creation of a logistic regression model that has the potential to be useful both in identifying factors associated with an increased likelihood of having heart disease and in predicting whether future patients are at risk of developing heart disease based on the characteristics examined in this data set.
 
 ### Data Origins
 
@@ -18,34 +18,36 @@ https://archive.ics.uci.edu/ml/datasets/heart+Disease. It is a collection of dat
 
 ### Preliminary Analysis and Variable Clarifications
 
-Before creating the logistic regression model, some preliminary graphs of the included variables were created. These graphs aid in checking for potential issues with low categorical data frequency and logistic regression assumption violations.
+Before creating the logistic regression model, some preliminary graphs of the data were created. These graphs aid in checking for potential issues with low categorical data frequency and logistic regression assumption violations.
 
 Below are box plots illustrating the distribution of the continuous variables in the data set, separated by disease status. For clarification, the variable ST depression measures blood flow to the heart.
 
 ![]("figures/final_cont_var.png")
 
-With the exception of ST depression induced by exercise relative to rest in the heart disease group, the distributions appear to be symmetrical without too many egregious outliers. This adds confidence that the estimated beta coefficients in the logistic regression model are accurate. Many of the distributions overlap significantly, which will reduce odds ratio estimates and make it more difficult to distinguish true differences between individuals with heart disease and healthy patients. 
+With the exception of ST depression  in the heart disease group, the distributions appear to be symmetrical without too many egregious outliers. This adds confidence that the estimated beta coefficients in the logistic regression model will be accurate. Many of the distributions overlap significantly, which will reduce odds ratio estimates and make it more difficult to distinguish true differences between individuals with heart disease and healthy patients. 
 
-The bar graphs displayed below make it easy to visualize the frequency of the levels of discrete variables in the data.  Fluoroscopy and thallium tests measure blood flow to the heart.  An electrocardiogram measures heart functionality to detect previous heart conditions and irregular heart beat [4]. Exercise induced angina simply refers to whether a patient experienced chest pain during exercise. 
+The bar graphs placed below make it easy to visualize the frequency of discrete variable levels in the data.  Fluoroscopy and thallium tests measure blood flow to the heart.  An electrocardiogram measures heart functionality to detect previous heart conditions and irregular heart beat [4]. Exercise induced angina refers to whether a patient experienced chest pain during exercise. 
 
 ![]("figures/final_disc_var.png")
 
-The variables resting electrocardiographic results, thallium, and peak exercise ST segment slope all have one category that has very small counts. This could result in an overfitted model because these categories will be underrepresented.  Thallium and chest pain type seem to have the most dramatic differences in counts, potentially indicating their future weight in predictive models. 
+The variables resting electrocardiographic results, thallium, and peak exercise ST segment slope all have one category that has very small counts. This could result in an overfitted model because these categories will be underrepresented in training models.  Thallium and chest pain type seem to have the most dramatic differences in counts, potentially indicating their future weight in predictive models. 
 
 ### Methods
 
-A logistic regression model will be created to estimate which variables have the most impact in explaining the presence of heart disease. Variable selection will ensure that variables which contribute similar information about disease status are not both included, or that variables which have no relationship to heart disease status are removed. The predictive power of the model will be evaluated with a ROC curve, specificity, and sensitivity.
+A logistic regression model will be created to estimate which variables have the most impact in explaining the presence of heart disease. Variable selection will ensure that variables which contribute duplicate information about disease status are not both included, or that variables which have no relationship to heart disease status are removed. 
+
+To increase predictive success, the threshold for labeling a patient as healthy or having heart disease will be determined.  The predictive power of the model will then be evaluated with a ROC curve, specificity, and sensitivity.
 
 ### Logistic Regression Model
 
-Before creating a finalized regression model, variable selection was implemented to determine which variables will create the strongest model.  The best model had an AIC of 219.7 and included 9 variables.
+Before creating a finalized regression model, variable selection was implemented to determine which variables will create the strongest model.  The best model had an AIC of 219.7 and included nine variables.
 
 The beta coefficients and 95% confidence intervals were then calculated and back-transformed onto the original scale.  P values less than 0.05 signify a significant beta coefficient. 
 
 #### Regression Output Table 
 \  
 
-The table below displays the output from the linear regression model.  The significant values (p < 0.05) are marked in blue.
+The table below displays the output from the linear regression model.  The significant p values (p < 0.05) are marked in blue.
 
 ```{r results = 'asis', message=FALSE, echo=FALSE}
 library(kableExtra)
@@ -58,13 +60,17 @@ reg.tab %>%
   kable_styling(bootstrap_options = c("striped","condensed"))
 ```
 
-As an example of interpretation, we are 95% confident that an individual who is male is between 1.758 to 13.8 times as likely to be diagnosed with heart disease as a female, holding all other variables constant.  Additionally, as the maximum heart rate of a patient increases by 1 beat per minute, we are 95% confident that he or she will be 0.964 to 1.006 times as likely to be diagnosed with heart disease.  
+As an example of interpretation, we are 95% confident that an individual who is male is between 1.758 to 13.8 times as likely to be diagnosed with heart disease as a female, holding all other variables constant.  
+
+Additionally, as the maximum heart rate of a patient increases by 1 beat per minute, we are 95% confident that he or she will be 0.964 to 1.006 times as likely to be diagnosed with heart disease.  
 
 
 #### Threshold Misclassification Rates
 \  
 
-Modifying the threshold at which an individual is classified as having heart disease can increase prediction success. Various thresholds between 0 and 1 were checked with the model to identify the threshold which minimized misclassifications.  A graph of these misclassification rates can be seen below. The threshold that will be used for future predictions is represented by the green line that corresponds with the threshold of 0.43.  
+Modifying the threshold at which an individual is classified as having heart disease can increase prediction success. Various thresholds between 0 and 1 were checked with the model to identify the threshold which minimized misclassifications. 
+
+A graph of these misclassification rates can be seen below. The threshold that will be used for future predictions is represented by the green line that corresponds with the threshold of 0.43.  
 
 ```{r, echo=FALSE, fig.align='center'}
 library(knitr)
@@ -77,24 +83,24 @@ One way to measure the strength of a logistic regression model is by examining a
 include_graphics("figures/ROC_Curve.png")
 ```
 
-A k-fold cross validation simulation was conducted to evaluate the predictive strength of the model. With each simulation, 90% of the heart disease data was allocated to a training set, and the remaining 10% set aside as a testing set.  The training set is used to create a logistic regression model using the same variables identified in variable selection above.  This training set can then be used to test its ability in accurately predicting the disease status of patients in the testing set.  From these predictions, measures of sensitivity, specificity, and ROC curves can be generated. This model had an average AUC of 0.889, average sensitivity of 0.799, and average specificity of 0.849.
+A k-fold cross validation simulation was conducted to evaluate the predictive strength of the model in classifying hypothetical new patients. With each simulation, 90% of the heart disease data was allocated to a training set, and the remaining 10% set aside as a testing set.  The training set is used to create a logistic regression model using the same variables identified in variable selection above.  The model then predicts the disease status of individuals in the testing set, who represent future patients with unknown disease status.  From these predictions, measures of sensitivity, specificity, and ROC curves can be generated. From 500 simulations, this model had an average AUC of 0.889, average sensitivity of 0.799, and average specificity of 0.849.
 
 ### Discussion
 
-The logistic regression model identified several variables that have a significant effect on positive heart disease status, including being male, having asymptomatic chest pain, increasing resting blood pressure, and having colored major blood vessels. Identifying these significant variables could help doctors monitor characteristics that could lead to heart disease.
+The logistic regression model identified several variables that have a significant effect on positive heart disease status, including being male, having asymptomatic chest pain, increasing resting blood pressure, and having colored major blood vessels. Identifying these significant variables could help doctors focus on monitoring characteristics that could lead to heart disease.
 
-The k fold cross validation indicates this regression model does an adequate job of predicting whether an individual has heart disease. With an AUC of 0.889, the model increases predictive success from random guessing (AUC =0.5). A sensitivity of 0.799 means that 79.9% of the individuals the model classified as having heart disease actually had heart disease.  The specificity of 0.849 means that 84.8% of individuals that the model identified as being healthy were actually healthy. While a higher sensitivity would indicate a stronger model, it is a better MISTAKE to classify individuals as DISEASED than miss important indication of heart problems.  Therefore, future models should focus on increasing the specificity rate, signifying that the model can always find the individuals who are at risk of heart disease issues.
+The k fold cross validation indicates this regression model does an adequate job of predicting whether a future patient has heart disease. With an AUC of 0.889, the model increases predictive success from random guessing (AUC =0.5). A sensitivity of 0.799 means that 79.9% of the individuals the model classified as having heart disease actually had heart disease.  The specificity of 0.849 means that 84.8% of individuals that the model identified as being healthy were actually healthy. While a higher sensitivity would indicate a stronger model, it is a better error to classify individuals as at risk than fail to find unhealthy individuals at risk of death.  Therefore, future models should focus on increasing the specificity rate, signifying that the model can always find the individuals who are at risk of heart disease issues.
 
-To validate the findings of this report, this process should be repeated using data collected from other sites. If the variables that were significant in this model continue to be significant with new data, then there is an even stronger indication that these characteristics contribute to heart disease. Additionally, other machine learning models could be trained using this data to see if higher predictive accuracy can be achieved. 
+To validate the findings of this report, this process should be repeated using data collected from other research centers. If the variables that were significant in this model continue to be significant with new data, then there is an even stronger indication that these characteristics contribute to heart disease. Additionally, other machine learning models could be trained using this data to see if higher predictive accuracy can be achieved. 
 
 
 #### Citations  
-\  
+\ 
 
-[1] https://www.medicalnewstoday.com/articles/237191#symptoms
+[1] https://www.cdc.gov/nchs/fastats/leading-causes-of-death.htm
 
-[2] https://www.mayoclinic.org/diseases-conditions/heart-disease/symptoms-causes/syc-20353118
+[2] https://www.medicalnewstoday.com/articles/237191#symptoms
 
-[3] https://www.cdc.gov/nchs/fastats/leading-causes-of-death.htm
+[3] https://www.mayoclinic.org/diseases-conditions/heart-disease/symptoms-causes/syc-20353118
 
 [4] https://www.mayoclinic.org/tests-procedures/ekg/about/pac-20384983
