@@ -27,7 +27,6 @@ derived_data/pure_heart.txt:\
  source_data/cleveland.txt
 	Rscript clean_data.R
 
-figures/cont_var_distributions.png\
 figures/final_cont_var.png\
 figures/disc_var_distributions.png\
 figures/final_disc_var.png:\
@@ -42,20 +41,8 @@ figures/ROC_Curve.png:\
 	derived_data/pure_heart.txt
 		Rscript log_regression.R
 
-assets/final_disc_var.png: figures/final_disc_var.png
-	cp figures/final_disc_var.png assets/final_disc_var.png
-
 assets/final_cont_var.png: figures/final_cont_var.png
 	cp figures/final_cont_var.png assets/final_cont_var.png
-	
-assets/cont_var_distributions.png: figures/cont_var_distributions.png
-	cp figures/cont_var_distributions.png assets/cont_var_distributions.png
 
 assets/disc_var_distributions.png: figures/disc_var_distributions.png
 	cp figures/disc_var_distributions.png assets/disc_var_distributions.png
-	
-assets/Threshold_Classification.png: figures/Threshold_Classification.png
-	cp figures/Threshold_Classification.png assets/Threshold_Classification.png
-	
-assets/ROC_Curve.png: figures/ROC_Curve.png
-	cp figures/ROC_Curve.png assets/ROC_Curve.png
