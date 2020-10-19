@@ -186,7 +186,7 @@ exercise.cnt <- ggplot(heart, aes(exercise.ang)) +
 # Max Vessels Counts
 mag.vessels.cnt <- ggplot(heart, aes(mag.vessels)) + 
 	geom_bar(aes(fill = disease.status), position = "dodge") + 
-	xlab("Major Vessels Colored by Flourosopy") + 
+	xlab("Major Vessels Colored by Fluorosopy") + 
 	ylab("") +
 	scale_fill_manual(values = bar.cols,
 				name = "Disease Status", 
