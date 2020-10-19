@@ -84,6 +84,7 @@ n.test <- round(.1*nrow(heart))
 
 ## Set my threshold for classifying
 cutoff <- my.thresh
+set.seed(34546266)
 
 ## Initialize matrices to hold CV results
 sens <- rep(NA,n.cv)
@@ -97,10 +98,12 @@ for(cv in 1:n.cv){
   # Separate into test and training sets
   test.obs <- sample(1:nrow(heart), n.test)
   test.set <- heart[test.obs,]
-  train.set <- heart[-test.obs,]
+  train.set <- heart[-test.obs, ]
   
   # Fit best model to training set
-  train.model <- heart.mod
+  train.model <- glm(disease.status ~ age + chest.pain + restingbp + maxheartrate +
+                      exercise.ang + st.depress + oldpeak + mag.vessels + thal,
+                     data = train.set, family = "binomial")
   
   # Use fitted model to predict test set
   pred.probs <- predict.glm(train.model, newdata = test.set, type = "response") #response gives probabilities
@@ -127,11 +130,6 @@ mean.sens <- mean(sens)
 mean.spec <- mean(spec)
 mean.ppv <- mean(ppv)
 mean.npv <- mean(npv)
-
-#####################################
-
-## ROC Curve Graph
-
 
 #####################################
 
