@@ -83,12 +83,12 @@ lay <- rbind(c(1,1,1,1,10),
              c(4,4,4,4,10),
              c(5,5,5,5,10))
 
-cont.vars <- arrangeGrob(age.bx, restingbp.bx, cholest.bx, maxheartrate.bx, st.depress.bx,
-                         left = textGrob("Disease Status", gp = gpar(fontsize = 15), rot = 90),
-                         top = textGrob("Continuous Variable Distributions", gp = gpar(fontsize = 18)),
-                         layout_matrix = lay)
+#cont.vars <- arrangeGrob(age.bx, restingbp.bx, cholest.bx, maxheartrate.bx, st.depress.bx,
+#                         left = textGrob("Disease Status", gp = gpar(fontsize = 15), rot = 90),
+#                         top = textGrob("Continuous Variable Distributions", gp = gpar(fontsize = 18)),
+#                         layout_matrix = lay)
 
-ggsave("figures/cont_var_distributions.png", cont.vars, width = 5, height = 6)
+#ggsave("figures/cont_var_distributions.png", cont.vars, width = 5, height = 6)
 
 final.cont.var <- arrangeGrob(age.bx, restingbp.bx, cholest.bx, maxheartrate.bx, st.depress.bx,
                          left = textGrob("Disease Status", gp = gpar(fontsize = 25), rot = 90),
