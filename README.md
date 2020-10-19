@@ -15,10 +15,10 @@ https://archive.ics.uci.edu/ml/datasets/heart+Disease.  There are thirteen expla
 I plan on performing a regression analysis to identify which variables are most useful in predicting heart disease in patients. I will also build a machine learning model using this heart disease data that could be used to predict the prevalence of heart disease in future patients.  At the completion of this analysis, this repository will contain the interpreted regression results and the finalized machine learning model. 
 
 ### Preliminary Figures
-![](figures/cont_var_distributions.png)
+![](assets/cont_var_distributions.png)
 The above boxplots illustrate the distributions of the continuous variables in the heart disease dataset.  The two categories with the greatest difference between cases and controls are Maximum Heart Rate and ST Depression Induced by Exercise Relative to Rest.
 
-![](figures/disc_var_distributions.png)
+![](assets/disc_var_distributions.png)
 The bar charts displayed above provide a quick summary of the prevalence of each categorical variable level, separated by disease status.
 
 ### Usage
