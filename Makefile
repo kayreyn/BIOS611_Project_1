@@ -16,7 +16,6 @@ HW_4.pdf:\
 		Rscript -e "rmarkdown::render('HW4.Rmd', output_format = 'pdf_document')"
 
 clean:
-	rm -f assets/*.png
 	rm -f figures/*.png
 	rm -f figures/*.pdf
 	rm -f derived_data/*.txt
