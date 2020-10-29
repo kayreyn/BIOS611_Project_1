@@ -28,19 +28,26 @@ You'll need to build the container:
 
     > docker build . -t project1-env
 
-This Docker container is based on rocker/verse. To run rstudio server:
+This Docker container is based on rocker/verse. To run rstudio server (replace with your password):
 
-    > docker run -v `pwd`:/home/rstudio -p 8787:8787\-e PASSWORD=mypassword -t project1-env
+    > docker run -v `pwd`:/home/rstudio -p 8787:8787\-e PASSWORD=some_pw -t project1-env
       
 Then connect to the machine on port 8787.
 
-On the command line (replace with your password):
+On the command line:
 
     > docker run -v `pwd`:/home/rstudio -e PASSWORD=some_pw -it l6 sudo -H -u rstudio /bin/bash -c "cd ~/; R"
     
 Or to run Bash:
 
     > docker run -v `pwd`:/home/rstudio -e PASSWORD=some_pw -it l6 sudo -H -u rstudio /bin/bash -c "cd ~/; /bin/bash"
+
+To examine the Jupyter Notebook code, enter:
+
+    > docker run -p 8765:8765 -v 'pwd':/home/rstudio -e PASSWORD=some_pw -it project1-env sudo -H -u rstudio /bin/bash -c "cd ~/; jupyter lab --ip 0.0.0.0 --port 8765"
+    
+Then connect to Jupyter by pasting the last token into a browser.
+
 
 Makefile
 ===========
