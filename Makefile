@@ -48,7 +48,8 @@ figures/Threshold_Classification.png\
 figures/ROC_Curve.png:\
  log_regression.R\
  derived_data/pure_heart.txt
-	
+	Rscript log_regression.R
+
 assets/final_cont_var.png: figures/final_cont_var.png
 	cp figures/final_cont_var.png assets/final_cont_var.png
 
