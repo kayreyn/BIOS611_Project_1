@@ -29,6 +29,7 @@ clean:
 	rm -f derived_data/*.txt
 	rm -f *.pdf
 	rm -f *.py
+	rm -f *.html
 	
 derived_data/pure_heart.txt:\
  clean_data.R\
