@@ -1,0 +1,144 @@
+---
+output: html_document
+---
+
+```{r, echo = FALSE, message=FALSE}
+library(tidyverse)
+library(gbm)
+library(ggplot2)
+library(gridExtra)
+library(GGally)
+
+# Set Seed
+set.seed(5050505)
+```
+
+### Question 1 - GBM Model
+```{r message = FALSE, echo = FALSE}
+## Load Data:
+hwg <- read_delim("source_data/HW5_HeightWeight.txt", col_names = TRUE, delim = "\t")
+
+# Assign Group
+hwg <- hwg %>% mutate(Set = sample(c("Train", "Validate", "Test"), size = nrow(hwg), prob = c(.7, .15,.15), replace= TRUE))
+
+# Gender Column becomes 0 or 1
+hwg <- hwg %>% mutate(Gender = c(Gender == "Male"))
+
+# Split up by Group
+train.5 <- hwg %>% filter(Set == "Train")
+validate.5 <- hwg %>% filter(Set == "Validate")
+test.5 <- hwg %>% filter(Set == "Test")
+
+# Build Model
+gbm.model.5 <- gbm(Gender ~ Height + Weight, distribution = "bernoulli",
+			 data = train.5,
+       n.trees = 100,
+       interaction.depth = 2,
+       shrinkage = 0.1)
+
+# Predict Genders
+gbm.pred.5 <- predict(gbm.model.5, newdata = validate.5, type = "response")
+
+# Accuracy
+gbm.accuracy.5 <- round(sum((gbm.pred.5 > 0.5) == validate.5$Gender) / nrow(validate.5), 3)
+gmb.acc.to.print <- paste(as.character(100 * gbm.accuracy.5), "%", sep = "")
+```
+
+In the previous HW assignment, the data was randomly generated and there was no difference in the distributions of height and weight by gender.  The accuracy of this previous model was around 50%.  Now, the accuracy has increased to `r gmb.acc.to.print`.  This is a significant increase, and indicates the model can accurately distinguish between men and women by the supplied variables.
+
+
+### Question 2 - Filtering, PCA, Normalize
+Before creating the PCA, I will remove all individuals who have a total column less than 20.  This will remove individuals who have no scores attached to any attributes.  I will also remove individuals whose alignment is listed as NA.
+
+```{r message = FALSE, echo = FALSE, warning=FALSE}
+## Load Data:
+library(ggfortify)
+library(e1071)
+
+char <- read_delim("source_data/HW5_Heros.txt", col_names = TRUE, delim = "\t")
+char$Alignment <- as.factor(char$Alignment)
+
+# Remove
+char <- char %>% filter(Total > 20, Alignment != "NA") %>% distinct()
+
+## Plots
+intel.hist <- ggplot(char, aes(x = Intelligence)) + geom_histogram()
+strength.hist <- ggplot(char, aes(x = Strength)) + geom_histogram()
+speed.hist <- ggplot(char, aes(x = Speed)) + geom_histogram()
+durability.hist <- ggplot(char, aes(x = Durability)) + geom_histogram()
+power.hist <- ggplot(char, aes(x = Power)) + geom_histogram()
+combat.hist <- ggplot(char, aes(x = Combat)) + geom_histogram()
+total.hist <- ggplot(char, aes(x = Total)) + geom_histogram()
+
+# grid.arrange(intel.hist, strength.hist, speed.hist, durability.hist, 
+#             power.hist, combat.hist, total.hist)
+
+min_max_norm <- function(x) {
+    (x - min(x)) / (max(x) - min(x))
+}
+
+#apply Min-Max normalization to first four columns in iris dataset
+char.norm <- as.data.frame(lapply(char[3:9], min_max_norm))
+
+# PCA
+pcs <- prcomp(char.norm %>% select(c(names(char)[3:9])))
+#summary(pcs)
+
+pca.plot <- autoplot(pcs, data = char, colour = 'Alignment')
+pca.plot
+
+```
+
+The first four principal components are important if you want to capture 85% of the variation in the data set. Normalization is important - PCA is measuring variation and the numerical characteristics are not all measured on the same scale.  Normalization ensures that the variation measured is not skewed by differing scales. Total is the sum of the numerical columns, therefore it was redundant to include it in the PCA. 
+
+
+### 3 - TSNE dimensionality reduction
+The graph below illustrates the TSNE reduction in python, plotted in R:
+
+```{r, echo = FALSE, message = FALSE}
+library(ggplot2)
+t.p <- read_delim("derived_data/hw5_python.txt", col_names = TRUE, delim = "\t")
+
+ggplot(t.p, aes(x = X1, y = X2, color = as.factor(Alignment))) + geom_point()	+
+  labs(color = "Alignment") 
+
+```
+
+
+There are two distinct clusters produced from TSNE; it does not appear to be character alignment that is the differentiating factor.  There are good and bad individuals in both clusters.  There are no neutral characters visible in the upper cluster, however these individuals could be buried under the good and bad points. 
+
+### 4 - Plots in Python
+
+The plot below is the TSNE reduction graph in Python created with plotnine.
+
+![](figures/H5_PlotNine.png){width=60%}
+
+This plot looks almost identical to the graph created in R with ggplot2. 
+
+### 5 - Caret GBM
+```{r, message = FALSE, results='hide'}
+library(caret)
+form <- Alignment ~ Intelligence + Strength + Speed + Durability + Power + Combat + Total
+
+trainIndex <- createDataPartition(char$Alignment, p = .8, 
+                                  list = FALSE, 
+                                  times = 1)
+
+char$alignment <- factor(char$Alignment)
+
+train_ctrl <- trainControl(method = "repeatedcv", number = 50);
+gbmFit1 <- train(form, data = char %>% slice(trainIndex), 
+                 method = "gbm", 
+                 trControl = train_ctrl,
+                 verbose = FALSE)
+#summary(gbmFit1)
+#gbmFit1
+
+```
+The most influential variables in this model are Intelligence, Speed, and Power.  The parameters used for the model are: n.trees = 50, interaction.depth = 1, shrinkage = 0.1, and n.minobsinnode = 10.
+
+### 6 -  Reason for K-fold
+K fold cross validation is important due to the random assignment of individuals to training and testing groups.  By chance, an unrepresentative or biased group of individuals could be assigned to the training group.  As a result, the model will be unable to effective categorize future individuals and the reported accuracy would be deceptively low.  Randomization also simulates using the model to predict future new data.  If we perform K fold cross validation protects against model metrics biased by chance outlier training groups. 
+
+### Q7 - Describe in words the process of recursive feature elimination.
+When you do recursive feature elimination, you are trying to determine which variables are most important to include in a model. You first create a model using all of the variables.  Then you determine which variable is contributing the least to your model and get rid of it.  Then you create a new model without that removed variable.  You continue doing the process of removing the least useful variable until your model is constructed from the number of variables you are interested in, or you have removed all of the redundant variables. 
