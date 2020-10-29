@@ -11,3 +11,12 @@ HW4_files
 Final_Report_cache
 *.pdf
 .bash_history
+*.py
+*.html
+.cache
+.conda
+.config
+.ipynb_checkpoints
+.python
+.jupyter
+.ipython
