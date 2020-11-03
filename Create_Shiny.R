@@ -20,7 +20,7 @@ heart <- suppressMessages(read_csv("derived_data/pure_heart.txt",
 heart$disease.status <- as.factor(heart$disease.status)
 
 ## List of Continuous Variable Choices
-cont.name <- names(heart)[c(1,4,5,8, 10)]
+cont.name <- names(heart)[c(1, 4, 5, 8, 10)]
 nice.name <- c("Age", "Resting Blood Pressure", "Cholesterol", "Maximum Heart Rate", "Standard Depression")
 
 str(heart)
@@ -29,7 +29,7 @@ str(heart)
 #################################################################
 
 # Get User Input
-args <- commandArgs(trailingOnly=T)
+args <- commandArgs(trailingOnly = TRUE)
 
 # Find Port
 port <- as.numeric(args[[1]])
@@ -81,15 +81,16 @@ server <- function(input, output, session) {
                       choices = nice.name[which(nice.name != input$x.ax)])
   }))
   
-
-  
-  # Output
+  # Graph Output
   output$ScatterDisease <- renderPlot({
     
     # Which X and Y were chosen?
     the.x <- cont.name[which(nice.name == input$x.ax)]
     the.y <- cont.name[which(nice.name == input$y.ax)]
+    
+    # Pause Until Y Var is Chosen
     req(the.y != "")
+    
     # Make Scatter by Disease Status
     d <- ggplot(heart, aes_string(x = the.x, y = the.y, color = "disease.status")) + geom_point() +
       ggtitle(paste("Heart Disease Status by ", input$x.ax, " and ", input$y.ax, ".", sep = "")) +
@@ -117,7 +118,8 @@ server <- function(input, output, session) {
       ylab(nice.name[which(cont.name == the.y)]) +
       xlab(nice.name[which(cont.name == the.x)])
     
-      grid.arrange(d, k)
+    # Clump Graphs
+    grid.arrange(d, k)
   })    
 }
 
