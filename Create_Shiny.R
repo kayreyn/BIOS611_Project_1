@@ -27,8 +27,8 @@ nice.name <- c("Age", "Resting Blood Pressure", "Cholesterol", "Maximum Heart Ra
 
 # Get User Input
 # Find Port
-#args <- commandArgs(trailingOnly=T)
-#port <- as.numeric(args[[1]])
+args <- commandArgs(trailingOnly=T)
+port <- as.numeric(args[[1]])
 
 ## Shiny App
 
@@ -185,7 +185,6 @@ server <- function(input, output, session) {
   
 }  
 
-shinyApp(ui = ui, server = server)
-#print(sprintf("Starting shiny on port %d", port))
-#shinyApp(ui = ui, server = server, options = list(port=port,
-#                                                host="0.0.0.0")) 
+print(sprintf("Starting shiny on port %d", port))
+shinyApp(ui = ui, server = server, options = list(port=port,
+                                                host="0.0.0.0")) 
