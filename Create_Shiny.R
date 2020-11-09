@@ -29,10 +29,10 @@ str(heart)
 #################################################################
 
 # Get User Input
-args <- commandArgs(trailingOnly = TRUE)
+#args <- commandArgs(trailingOnly = TRUE)
 
 # Find Port
-port <- as.numeric(args[[1]])
+#port <- as.numeric(args[[1]])
 
 ## Shiny App
 
@@ -40,7 +40,7 @@ port <- as.numeric(args[[1]])
 ui <- fluidPage(
   
   # App title ----
-  titlePanel("K Means for Disease Status"),
+  titlePanel("Train K Means for Disease Status"),
   
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -58,7 +58,13 @@ ui <- fluidPage(
       # Input: Y Axis Variable ----
       selectInput(inputId = "y.ax",
                   label = "Response:",
-                  choices = ""),
+                  choices = nice.name[2:5]),
+      
+      # Input: Cluster Assignment ----
+      selectInput(inputId = "clust",
+                  label = "Heart Disease Cluster:",
+                  choice = c("1", "2"),
+                  selected = "1"),
 
     ),
     
@@ -66,8 +72,8 @@ ui <- fluidPage(
     mainPanel(
       
       # Output: Scatterplot by Disease Status ----
-      plotOutput(outputId = "ScatterDisease")
-      
+      plotOutput(outputId = "ScatterDisease"),
+      textOutput(outputId = "FScore")
     )
   )
 )
@@ -75,52 +81,96 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   # Update: Y Axis Variable
-  observeEvent(input$x.ax,({
-    updateSelectInput(session, 
-                      "y.ax", 
-                      choices = nice.name[which(nice.name != input$x.ax)])
-  }))
+  observeEvent(input$x.ax,{
+    if (input$x.ax == input$y.ax){
+      updateSelectInput(session, 
+                        "y.ax", 
+                        choices = nice.name[which(nice.name != input$x.ax)])
+    }
+  })
   
   # Graph Output
   output$ScatterDisease <- renderPlot({
     
-    # Which X and Y were chosen?
+    # Pause Until Y Var is Chosen
+    req(input$y.ax != "")
+    req(input$y.ax != input$x.ax)
+    
+    # Which X and Y were chosen? Which Cluster?
     the.x <- cont.name[which(nice.name == input$x.ax)]
     the.y <- cont.name[which(nice.name == input$y.ax)]
     
-    # Pause Until Y Var is Chosen
-    req(the.y != "")
+    ## K Means
+    if (which(nice.name == input$x.ax) < which(nice.name == input$y.ax)){
+      kmean.df <- heart %>% select(c("disease.status", the.x, the.y))
+    } else {
+      kmean.df <- heart %>% select(c("disease.status", the.y, the.x))
+    }
+    
+    
+    # Copy and Scale
+    kmean.df.s <- kmean.df
+    kmean.df.s[ ,c(2:3)] <- scale(kmean.df.s[ , c(2:3)])
+    
+    # KMeans
+    cluster.det <- kmeans(kmean.df.s[, c(2:3)], 2, nstart = 25)
+    
+    # Assign Cluster Nums
+    kmean.df$cluster.num <- as.factor(cluster.det$cluster)
+    
+    # Create Confusion Matrix
+    conf.mat <- as.data.frame(table(as.factor(kmean.df$disease.status), kmean.df$cluster.num))
+    ReactiveDf(conf.mat)
     
     # Make Scatter by Disease Status
     d <- ggplot(heart, aes_string(x = the.x, y = the.y, color = "disease.status")) + geom_point() +
-      ggtitle(paste("Heart Disease Status by ", input$x.ax, " and ", input$y.ax, ".", sep = "")) +
+      ggtitle(paste("Heart Disease Status by ", input$x.ax, " and ", input$y.ax, sep = "")) +
       ylab(nice.name[which(cont.name == the.y)]) +
       xlab(nice.name[which(cont.name == the.x)]) +
       labs(color = "Disease Status") +
       scale_color_manual(labels = c("Healthy", "Heart Disease"), values = c("blue", "red"))
-      
-    ## K Means
-    # Prepare small df
-    kmean.df <- heart %>% select(c(the.x, the.y))
-    
-    # KMeans
-    cluster.det <- kmeans(kmean.df, 2)
-    
-    # Assign Cluster Nums
-    kmean.df$cluster.num <- as.character(cluster.det$cluster)
-    
+  
     # Graph
     k <- ggplot(kmean.df, aes_string(x = the.x, y = the.y, color = "cluster.num")) +
       geom_point() +
       labs(color = "Cluster") +
-      scale_color_manual(labels = c("Group 1", "Group 2"), values = c("red", "blue")) +
       ggtitle("K Means Clusters") +
+      scale_color_manual(labels = c("1", "2"), values = c("deepskyblue", "indianred1")) +
       ylab(nice.name[which(cont.name == the.y)]) +
       xlab(nice.name[which(cont.name == the.x)])
-    
+
+      
     # Clump Graphs
     grid.arrange(d, k)
+
   })    
+  
+  ReactiveDf <- reactiveVal(df)
+  
+  # Output f1 Score
+  output$FScore <- renderText({
+    req(input$y.ax != "")
+
+    conf.mat <- ReactiveDf()
+
+    d.y <- input$clust
+    d.n.ops <- c("1", "2")
+    d.n <- d.n.ops[which(d.n.ops != d.y)]
+
+    # Calculate Precision and Recall
+    pres <- (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3]) /
+      (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3] +
+        conf.mat[which(conf.mat$Var1 == "0" & conf.mat$Var2 == d.y), 3])
+    rec <-  (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3]) /
+      (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3] +
+        conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.n), 3])
+
+    # F1 Score
+    f1 <- 2 * (pres * rec) / (pres + rec)
+
+    paste("The F1 Score is ", round(f1, 3), sep = "")
+  })
+  
 }
 
 shinyApp(ui = ui, server = server) 
