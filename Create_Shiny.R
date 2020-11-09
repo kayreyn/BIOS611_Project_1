@@ -69,7 +69,11 @@ ui <- fluidPage(
       
       # Output: Scatterplot by Disease Status ----
       plotOutput(outputId = "ScatterDisease"),
-      textOutput(outputId = "FScore")
+      textOutput(outputId = "FScore"),
+      tags$head(tags$style("#FScore{color: black;
+                                 font-size: 20px;
+                                 font-style: bold;
+                                 }"))
     )
   )
 )
@@ -118,7 +122,7 @@ server <- function(input, output, session) {
 
     # Make Scatter by Disease Status
     d <- ggplot(heart, aes_string(x = the.x, y = the.y, color = "disease.status")) + geom_point() +
-      ggtitle(paste("Heart Disease Status by ", input$x.ax, " and ", input$y.ax, sep = "")) +
+      ggtitle("Original Distribution by Heart Disease Status") +
       ylab(nice.name[which(cont.name == the.y)]) +
       xlab(nice.name[which(cont.name == the.x)]) +
       labs(color = "Disease Status") +
@@ -128,7 +132,7 @@ server <- function(input, output, session) {
     k <- ggplot(kmean.df, aes_string(x = the.x, y = the.y, color = "cluster.num")) +
       geom_point() +
       labs(color = "Cluster") +
-      ggtitle("K Means Clusters") +
+      ggtitle("Calculated K Means Clusters") +
       scale_color_manual(breaks = c("1", "2"), labels = c("1", "2"), values = c("darkturquoise", "purple")) +
       ylab(nice.name[which(cont.name == the.y)]) +
       xlab(nice.name[which(cont.name == the.x)])
@@ -147,18 +151,20 @@ server <- function(input, output, session) {
     # F1 Score
     f1 <- 2 * (pres * rec) / (pres + rec)
   
-    # Report
     output$FScore <- renderText({
       pay.attention <- input$clust
       paste("The F1 Score is ", round(f1, 3), sep = "")
     })
-
+    
     # Clump Graphs
     grid.arrange(d, k)
 
-  })    
+  })   
+
   
 }  
+
+
 
 print(sprintf("Starting shiny on port %d", port))
 shinyApp(ui = ui, server = server, options = list(port=port,
