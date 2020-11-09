@@ -30,7 +30,7 @@ You'll need to build the container:
 
 This Docker container is based on rocker/verse. To run rstudio server (replace with your password):
 
-    > docker run -v `pwd`:/home/rstudio -p 8787:8787\-e PASSWORD=some_pw -t project1-env
+    > docker run -v `pwd`:/home/rstudio -p 8787:8787\ -e PASSWORD=some_pw -t project1-env
       
 Then connect to the machine on port 8787.
 
@@ -48,6 +48,19 @@ To examine the Jupyter Notebook code, enter:
     
 Then connect to Jupyter by pasting the last token into a browser.
 
+To open the R Shiny Server:
+
+    > docker run -v `pwd`:/home/rstudio -p 8787:8787\ -p 8788:8787 -e PASSWORD=some_pw -t project1-env
+    
+Then in the RStudio Terminal enter:
+
+    > PORT=8788 make kmeans_train
+    
+In an internet browser, search for:
+
+    > localhost:8788
+
+This will open the R Shiny Server
 
 Makefile
 ===========
