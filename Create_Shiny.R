@@ -27,8 +27,8 @@ nice.name <- c("Age", "Resting Blood Pressure", "Cholesterol", "Maximum Heart Ra
 
 # Get User Input
 # Find Port
-args <- commandArgs(trailingOnly=T)
-port <- as.numeric(args[[1]])
+#args <- commandArgs(trailingOnly=T)
+#port <- as.numeric(args[[1]])
 
 ## Shiny App
 
@@ -43,7 +43,7 @@ ui <- fluidPage(
     
     # Sidebar panel for inputs ----
     sidebarPanel(
-      div("Please Select Desired Variables"),
+      div("Find the two variables that best divide patients into disease status groups. Then, choose which cluster group should correspond to the heart disease group. The best model will maximize the F1 Score."),
       
       # Input: X Axis Variable ----
       selectInput(inputId = "x.ax",
@@ -88,9 +88,12 @@ server <- function(input, output, session) {
                         choices = nice.name[which(nice.name != input$x.ax)])
     }
   })
+
+  # Set Reactive Values
+  f1 <- reactiveVal(0)
+  km <- reactiveValues(df = data.frame())
   
-  # Graph Output
-  output$ScatterDisease <- renderPlot({
+  observeEvent(list(input$x.ax, input$y.ax), {
     
     # Pause Until Y Var is Chosen
     req(input$y.ax != "")
@@ -99,9 +102,6 @@ server <- function(input, output, session) {
     # Which X and Y were chosen? Which Cluster?
     the.x <- cont.name[which(nice.name == input$x.ax)]
     the.y <- cont.name[which(nice.name == input$y.ax)]
-    d.y <- input$clust
-    d.n.ops <- c("1", "2")
-    d.n <- d.n.ops[which(d.n.ops != d.y)]
 
     ## K Means
     if (which(nice.name == input$x.ax) < which(nice.name == input$y.ax)){
@@ -112,14 +112,50 @@ server <- function(input, output, session) {
     
     # Copy and Scale
     kmean.df.s <- kmean.df
-    kmean.df.s[ ,c(2:3)] <- scale(kmean.df.s[ , c(2:3)])
+    kmean.df.s[ , c(2:3)] <- scale(kmean.df.s[ , c(2:3)])
     
     # KMeans
     cluster.det <- kmeans(kmean.df.s[, c(2:3)], 2, nstart = 25)
     
     # Assign Cluster Nums
     kmean.df$cluster.num <- as.factor(cluster.det$cluster)
-
+    
+    km$df <- kmean.df
+  })    
+    
+  observeEvent(list(input$x.ax, input$y.ax, input$clust), {
+    
+    # Make Conf
+    d.y <- input$clust
+    d.n.ops <- c("1", "2")
+    d.n <- d.n.ops[which(d.n.ops != d.y)]
+    df <- km$df
+    conf.mat <- as.data.frame(table(as.factor(df$disease.status), as.factor(df$cluster.num)))
+    
+    # Calculate Precision and Recall
+    pres <- (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3]) /
+      (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3] +
+         conf.mat[which(conf.mat$Var1 == "0" & conf.mat$Var2 == d.y), 3])
+    rec <-  (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3]) /
+      (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3] +
+         conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.n), 3])
+    
+    # F1 Score
+    f1t <- round(2 * (pres * rec) / (pres + rec),3)
+    f1(f1t)
+  })
+  
+  # Scatter Output
+  output$ScatterDisease <- renderPlot({
+    
+    # Pause
+    req(input$y.ax != input$x.ax)
+    
+    # Which Vars?
+    the.x <- cont.name[which(nice.name == input$x.ax)]
+    the.y <- cont.name[which(nice.name == input$y.ax)]
+    kmean.df <- km$df
+    
     # Make Scatter by Disease Status
     d <- ggplot(heart, aes_string(x = the.x, y = the.y, color = "disease.status")) + geom_point() +
       ggtitle("Original Distribution by Heart Disease Status") +
@@ -137,35 +173,19 @@ server <- function(input, output, session) {
       ylab(nice.name[which(cont.name == the.y)]) +
       xlab(nice.name[which(cont.name == the.x)])
 
-    # Make Conf
-    conf.mat <- as.data.frame(table(as.factor(kmean.df$disease.status), as.factor(kmean.df$cluster.num)))
-    
-    # Calculate Precision and Recall
-    pres <- (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3]) /
-      (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3] +
-         conf.mat[which(conf.mat$Var1 == "0" & conf.mat$Var2 == d.y), 3])
-    rec <-  (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3]) /
-      (conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.y), 3] +
-         conf.mat[which(conf.mat$Var1 == "1" & conf.mat$Var2 == d.n), 3])
-    
-    # F1 Score
-    f1 <- 2 * (pres * rec) / (pres + rec)
-  
-    output$FScore <- renderText({
-      pay.attention <- input$clust
-      paste("The F1 Score is ", round(f1, 3), sep = "")
-    })
-    
     # Clump Graphs
     grid.arrange(d, k)
 
   })   
-
+  
+  # F1 Value Output
+  output$FScore <- renderText({
+    paste("The F1 Score is ", f1(), sep = "")
+  })
   
 }  
 
-
-
-print(sprintf("Starting shiny on port %d", port))
-shinyApp(ui = ui, server = server, options = list(port=port,
-                                                host="0.0.0.0")) 
+shinyApp(ui = ui, server = server)
+#print(sprintf("Starting shiny on port %d", port))
+#shinyApp(ui = ui, server = server, options = list(port=port,
+#                                                host="0.0.0.0")) 
