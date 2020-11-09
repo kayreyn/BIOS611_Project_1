@@ -18,3 +18,5 @@ RUN R -e "install.packages('e1071')"
 RUN apt update -y && apt install -y python3-pip
 RUN pip3 install jupyter jupyterlab
 RUN pip3 install numpy pandas sklearn plotnine matplotlib pandasql bokeh
+RUN R -e "install.packages('plotly')"
+RUN R -e "install.packages('shiny')"
