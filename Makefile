@@ -62,3 +62,6 @@ figures/H5_PlotNine.png:\
  source_data/HW5_Heros.txt
 	jupyter nbconvert --to=python HW5-Python.ipynb
 	python3 HW5-Python.py 
+	
+kmeans_train: derived_data/pure_heart.txt
+	Rscript Create_Shiny.R ${PORT}
