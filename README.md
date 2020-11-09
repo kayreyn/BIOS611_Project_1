@@ -56,11 +56,10 @@ Then in the RStudio Terminal enter:
 
     > PORT=8788 make kmeans_train
     
-In an internet browser, search for:
+To view the R Shiny Server, search for the following in an internet browser:
 
     > localhost:8788
 
-This will open the R Shiny Server
 
 Makefile
 ===========
