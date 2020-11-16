@@ -6,6 +6,7 @@ Final_Report.pdf:\
  figures/final_disc_var.png\
  figures/final_cont_var.png\
  derived_data/regression_output.txt\
+ figures/PCA.png\
  figures/ROC_Curve.png\
  figures/Threshold_Classification.png
 	Rscript -e "rmarkdown::render('Final_Report.Rmd', output_format = 'pdf_document')"
@@ -49,6 +50,12 @@ figures/ROC_Curve.png:\
  log_regression.R\
  derived_data/pure_heart.txt
 	Rscript log_regression.R
+
+figures/PCA.png:\
+ PCA-Python.ipynb\
+ derived_data/pure_heart.txt
+	jupyter nbconvert --to=python PCA-Python.ipynb
+	python3 PCA-Python.py
 
 assets/final_cont_var.png: figures/final_cont_var.png
 	cp figures/final_cont_var.png assets/final_cont_var.png
