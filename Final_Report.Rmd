@@ -38,6 +38,8 @@ A logistic regression model will be created to estimate which variables have the
 
 To increase predictive success, the threshold for labeling a patient as healthy or having heart disease will be determined.  The predictive power of the model will then be evaluated with a ROC curve, specificity, and sensitivity.
 
+Finally, a principal component analysis will be conducted to determine whether the continuous variables in this data can be used to successfully divide patients by heart disease status.
+
 ### Logistic Regression Model
 
 Before creating a finalized regression model, variable selection was implemented to determine which variables will create the strongest model.  The best model had an AIC of 219.7 and included nine variables.
@@ -65,6 +67,7 @@ As an example of interpretation, we are 95% confident that an individual who is 
 Additionally, as the maximum heart rate of a patient increases by 1 beat per minute, we are 95% confident that he or she will be 0.964 to 1.006 times as likely to be diagnosed with heart disease.  
 
 
+  
 #### Threshold Misclassification Rates
 \  
 
@@ -85,13 +88,24 @@ include_graphics("figures/ROC_Curve.png")
 
 A k-fold cross validation simulation was conducted to evaluate the predictive strength of the model in classifying hypothetical new patients. With each simulation, 90% of the heart disease data was allocated to a training set, and the remaining 10% set aside as a testing set.  The training set is used to create a logistic regression model using the same variables identified in variable selection above.  The model then predicts the disease status of individuals in the testing set, who represent future patients with unknown disease status.  From these predictions, measures of sensitivity, specificity, and ROC curves can be generated. From 500 simulations, this model had an average AUC of 0.889, average sensitivity of 0.799, and average specificity of 0.849.
 
+
+#### Principal Component Anaylsis
+Principal Component Analysis (PCA) was conducted in python.  The continuous variables were isolated and standardized before performing PCA. 
+
+Below is a plot of the first two principal components from PCA.  The first two principal components capture 56% of the variation in the heart disease data.
+
+![](figures/PCA.png)
+
 ### Discussion
 
 The logistic regression model identified several variables that have a significant effect on positive heart disease status, including being male, having asymptomatic chest pain, increasing resting blood pressure, and having colored major blood vessels. Identifying these significant variables could help doctors focus on monitoring characteristics that could lead to heart disease.
 
 The k fold cross validation indicates this regression model does an adequate job of predicting whether a future patient has heart disease. With an AUC of 0.889, the model increases predictive success from random guessing (AUC =0.5). A sensitivity of 0.799 means that 79.9% of the individuals the model classified as having heart disease actually had heart disease.  The specificity of 0.849 means that 84.8% of individuals that the model identified as being healthy were actually healthy. While a higher sensitivity would indicate a stronger model, it is a better error to classify individuals as at risk than fail to find unhealthy individuals at risk of death.  Therefore, future models should focus on increasing the specificity rate, signifying that the model can always find the individuals who are at risk of heart disease issues.
 
+Principal Component Analysis did not successfully divide individuals into distinct afflicted and control groups.  The plot of the first two principal components shows that there is a lot of overlap between individuals with heart disease and healthy individuals.  Since the first two principal components only capture 56% of the variation in the data set, this lack of distinction is not surprising.  Clearly, information from the categorical variables is also needed to successfully create a precise division between heart disease statuses.   
+
 To validate the findings of this report, this process should be repeated using data collected from other research centers. If the variables that were significant in this model continue to be significant with new data, then there is an even stronger indication that these characteristics contribute to heart disease. Additionally, other machine learning models could be trained using this data to see if higher predictive accuracy can be achieved. 
+
 
 
 #### Citations  
